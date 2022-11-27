@@ -1,8 +1,10 @@
-package com.javaoffers.tess4f.ocr.sample;
+package com.javaoffers.material.sample;
 
-import com.javaoffers.tess4j.ocr.os.TesseractOS;
-import com.javaoffers.tess4j.ocr.tess4j.TesseractOCR;
-import com.javaoffers.tess4j.ocr.utils.OCRUtils;
+import com.javaoffers.material.base.os.TesseractOS;
+import com.javaoffers.material.base.tess4j.TesseractOCR;
+import com.javaoffers.material.base.utils.OCRUtils;
+
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;

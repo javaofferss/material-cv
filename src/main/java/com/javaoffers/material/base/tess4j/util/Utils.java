@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.javaoffers.tess4j.ocr.tess4j.util;
+package com.javaoffers.material.base.tess4j.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

@@ -1,14 +1,13 @@
-package com.javaoffers.tess4j.ocr.utils;
+package com.javaoffers.material.base.utils;
 
-import com.javaoffers.tess4j.ocr.tess4j.TesseractOCR;
-import com.javaoffers.tess4j.ocr.vietocr.ImageHelper;
+import com.javaoffers.material.base.tess4j.TesseractOCR;
+import com.javaoffers.material.base.vietocr.ImageHelper;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
-import static com.javaoffers.tess4j.ocr.utils.ImageUtils.processImg;
 
 public class OCRUtils {
 
@@ -54,7 +53,7 @@ public class OCRUtils {
         // 这里对图片黑白处理,增强识别率.这里先通过截图,截取图片中需要识别的部分
         BufferedImage bi = ImageHelper.convertImageToGrayscale(bufferedImage);
         // 图片亮度
-        processImg(bi, brighten);
+        ImageUtils.processImg(bi, brighten);
         Tesseract instance = TesseractOCR.getInstance();
         return instance.doOCR(bi);
     }
@@ -63,7 +62,7 @@ public class OCRUtils {
         // 这里对图片黑白处理,增强识别率.这里先通过截图,截取图片中需要识别的部分
         BufferedImage bi = ImageHelper.convertImageToGrayscale(bufferedImage);
         // 图片亮度
-        processImg(bi, brighten);
+        ImageUtils.processImg(bi, brighten);
         if (saveImagePath != null) {
             boolean write = ImageIO.write(bi, "png", new File(saveImagePath + System.nanoTime()));
         }

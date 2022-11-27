@@ -13,9 +13,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.javaoffers.tess4j.ocr.tess4j;
+package com.javaoffers.material.base.tess4j;
 
-import com.javaoffers.tess4j.ocr.os.TesseractOS;
+import com.javaoffers.material.base.os.TesseractOS;
 import com.sun.jna.Pointer;
 import com.sun.jna.StringArray;
 import com.sun.jna.ptr.PointerByReference;

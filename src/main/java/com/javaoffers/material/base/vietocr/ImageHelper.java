@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.javaoffers.tess4j.ocr.vietocr;
+package com.javaoffers.material.base.vietocr;
 
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;

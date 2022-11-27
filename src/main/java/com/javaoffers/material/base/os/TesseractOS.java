@@ -1,4 +1,4 @@
-package com.javaoffers.tess4j.ocr.os;
+package com.javaoffers.material.base.os;
 
 /**
  * 系统平台

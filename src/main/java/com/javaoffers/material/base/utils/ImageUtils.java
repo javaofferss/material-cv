@@ -1,4 +1,4 @@
-package com.javaoffers.tess4j.ocr.utils;
+package com.javaoffers.material.base.utils;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
