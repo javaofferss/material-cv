@@ -65,13 +65,35 @@ public class MatSample {
         //注意子mat像素被修改后也会影响父mat中对应子mat的区域
         imwrite("img/blurDog.png", mat2);
 
+        //CV_8UC3 可以理解 每个像素点在内存空间所占的空间大小8bite。使用3通道
+        // r g b . 可以利用RGB去创建 scalar,
+        Scalar scalar = RGB(255,   0,   0);
+        Mat newMat = new Mat(200, 300, CV_8UC3, RGB(0, 0, 0));
+        Mat subMat = newMat.apply(new Rect(0, 0, 150, 200));
+        Mat scalarMat = new Mat(200, 100, CV_8UC3, scalar);
+        //这里用setTo会出现异常
+        scalarMat.copyTo(subMat);
+        logger.info(newMat.toString());
+        imwrite("img/setTo.jpg", newMat);
 
-
-
+        //将dog填充到两个矩阵中
+        Mat dogLeft = mat.clone();
+        Mat leftMat = newMat.apply(new Rect(0, 0, 150, 200));
+        //重置大小
+        resize(dogLeft,dogLeft, leftMat.size());
+        Mat dogRight = mat.clone();
+        Mat rightMat = newMat.apply(new Rect(150, 0, 150, 200));
+        //重置大小
+        resize(dogRight, dogRight, rightMat.size());
+        dogLeft.copyTo(leftMat);
+        dogRight.copyTo(rightMat);
+        imwrite("img/leftRightDog.jpg", newMat);
 
 
 
     }
+
+
 
 
 
