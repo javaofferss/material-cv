@@ -188,9 +188,10 @@ public class MatSample {
         warpAffine(copy, des, newMat, copy.size());
         imwrite("img/rotationMatrix2D.jpg", des);
 
+        //没有输出视频
         int fourcc = VideoWriter.fourcc("m".getBytes()[0], "p".getBytes()[0], "4".getBytes()[0], "v".getBytes()[0]);
         int fpt = 25;
-        VideoWriter videoWriter = new VideoWriter("img/video", fourcc, fpt, copy.size());
+        VideoWriter videoWriter = new VideoWriter("img/video.mp4", fourcc, fpt, copy.size());
         videoWriter.write(copy);
         videoWriter.write(des);
         videoWriter.release();
