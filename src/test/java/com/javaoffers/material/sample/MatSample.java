@@ -128,15 +128,40 @@ public class MatSample {
 
 
         //不会输出文件.
+        clone = imread.clone();
         reshape = clone.reshape(4);
         i1 = reshape.arrayWidth();
-        System.out.println(i +" : "+ i1);//701 : 701
+        System.out.println(i +" : "+ i1);//701 : 1
         imwrite("img/testReshape4.jpg", reshape);
 
+        //不会输出文件.
+        clone = imread.clone();
         reshape = clone.reshape(0,1);
         i1 = reshape.arrayWidth();
-        System.out.println(i +" : "+ i1);//701 : 701
+        System.out.println(i +" : "+ i1);//701 : 280400
         imwrite("img/testReshape0_1.jpg", reshape);
+
+        //不会输出文件.
+        clone = imread.clone();
+        reshape = clone.reshape(1,1);
+        i1 = reshape.arrayWidth();
+        System.out.println(i +" : "+ i1);//701 : 841200
+        imwrite("img/testReshape1_1.jpg", reshape);
+
+        //不会输出文件.
+        clone = imread.clone();
+        reshape = clone.reshape(3,1);
+        i1 = reshape.arrayWidth();
+        System.out.println(i +" : "+ i1);//701 : 280400
+        imwrite("img/testReshape3_1.jpg", reshape);
+        /**
+         * 更多讲解:https://ispacesoft.com/50726.html
+         * 可见，不管怎么变，都遵循这样一个等式：
+         * 变化之前的 rowscolschannels = 变化之后的 rowscolschannels
+         * 我们只能改变通道数和行数，列数不能改变，它是自动变化的。
+         * 但是要注意的是，在变化的时候，要考虑到是否整除的情况。如果改变的数值出现不能整除，就会报错。
+         */
+
     }
 
 
