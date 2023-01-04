@@ -1,4 +1,4 @@
-package src.test.java.com.javaoffers.material.sample;
+package com.javaoffers.material.sample;
 
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -30,6 +30,7 @@ import static org.bytedeco.opencv.global.opencv_core.*;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.*;
 import static org.bytedeco.opencv.global.opencv_imgproc.*;
 
+
 /**
  * @description: opencv mat
  * @author: create by cmj on 2022/11/26 18:29
@@ -38,6 +39,7 @@ public class MatSample {
 
     static Logger logger = LoggerFactory.getLogger("MatSample");
 
+    Mat imread = imread("img/dog.png");
     /**
      * 加载图像
      */
@@ -89,7 +91,63 @@ public class MatSample {
         dogRight.copyTo(rightMat);
         imwrite("img/leftRightDog.jpg", newMat);
 
+    }
 
+    @Test
+    public void testResize(){
+        Mat clone = imread.clone();
+        //只保留行数. 可用于横向截取
+        clone.resize(imread.arrayHeight()/2);
+        imwrite("img/testShrink.jpg",clone);
+
+        clone = imread.clone();
+        Scalar scalar = RGB(255,   255,   255);
+        //这里的scalar好像不起作用
+        clone.resize(imread.arrayHeight()/2, scalar);
+        imwrite("img/testShrink2.jpg",clone);
+    }
+
+    @Test
+    public void testReshape(){
+        Mat clone = imread.clone();
+        int i = clone.arrayWidth();
+        //只能为1,3,4
+        //1: 行不变列会增加. 并为为灰色
+        Mat reshape = clone.reshape(1);
+        int i1 = reshape.arrayWidth();
+        System.out.println(i +" : "+ i1);//701 : 2103 扩大了3倍
+        imwrite("img/testReshape.jpg", reshape);
+
+        clone = imread.clone();
+
+        //没有任何变化
+        reshape = clone.reshape(3);
+        i1 = reshape.arrayWidth();
+        System.out.println(i +" : "+ i1);//701 : 701
+        imwrite("img/testReshape3.jpg", reshape);
+
+
+        //不会输出文件.
+        reshape = clone.reshape(4);
+        i1 = reshape.arrayWidth();
+        System.out.println(i +" : "+ i1);//701 : 701
+        imwrite("img/testReshape4.jpg", reshape);
+
+        reshape = clone.reshape(0,1);
+        i1 = reshape.arrayWidth();
+        System.out.println(i +" : "+ i1);//701 : 701
+        imwrite("img/testReshape0_1.jpg", reshape);
+    }
+
+
+
+    @Test
+    public void testImg2Video(){
+        Mat imread = imread("img/dog.png");
+        Mat copy = imread.clone();
+
+        // cv2.getRotationMatrix2D(center,angle,scale)
+        //getRotationMatrix2D()
 
     }
 
