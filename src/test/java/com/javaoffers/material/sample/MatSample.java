@@ -2,6 +2,7 @@ package com.javaoffers.material.sample;
 
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_videoio.VideoWriter;
 import org.junit.Test;
 import org.opencv.core.Core;
 import org.opencv.core.MatOfInt;
@@ -170,9 +171,29 @@ public class MatSample {
     public void testImg2Video(){
         Mat imread = imread("img/dog.png");
         Mat copy = imread.clone();
-
+        int w2 = copy.arrayWidth()/ 2;
+        int h2 = copy.arrayHeight() / 2;
+        Point2f point = new Point2f(w2, h2);
         // cv2.getRotationMatrix2D(center,angle,scale)
-        //getRotationMatrix2D()
+        /**
+         *   Center：旋转中心
+         *
+         *    Angle:旋转角度
+         *
+         *    Scale:缩放比例
+         */
+        Mat newMat = getRotationMatrix2D(point, 45, 1);
+        // 输入,输出,旋转,大小
+        Mat des = copy.clone();
+        warpAffine(copy, des, newMat, copy.size());
+        imwrite("img/rotationMatrix2D.jpg", des);
+
+        int fourcc = VideoWriter.fourcc("m".getBytes()[0], "p".getBytes()[0], "4".getBytes()[0], "v".getBytes()[0]);
+        int fpt = 25;
+        VideoWriter videoWriter = new VideoWriter("img/video", fourcc, fpt, copy.size());
+        videoWriter.write(copy);
+        videoWriter.write(des);
+        videoWriter.release();
 
     }
 
