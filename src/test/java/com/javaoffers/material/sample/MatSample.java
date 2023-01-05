@@ -1,5 +1,6 @@
 package com.javaoffers.material.sample;
 
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_videoio.VideoWriter;
@@ -15,6 +16,7 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
@@ -94,8 +96,11 @@ public class MatSample {
 
     }
 
+    /**
+     * 另一个方法可以放大/缩小
+     */
     @Test
-    public void testResize(){
+    public void testMatResize(){
         Mat clone = imread.clone();
         //只保留行数. 可用于横向截取
         clone.resize(imread.arrayHeight()/2);
@@ -165,8 +170,9 @@ public class MatSample {
 
     }
 
-
-
+    /**
+     * 旋转并生成视频
+     */
     @Test
     public void testImg2Video(){
         Mat imread = imread("img/dog.png");
@@ -202,10 +208,106 @@ public class MatSample {
             videoWriter.write(des.clone());
             photos--;
         }
+        videoWriter.release();
+    }
 
+    /**
+     * 缩放. 并生成动画
+     */
+    @Test
+    public void testResize(){
+        Mat clone = imread.clone();
+        Size size = clone.size();
+        int height = size.height();
+        int width = size.width();
+        int xh = height / 2;
+        int xw = width / 2;
+        Mat mat = new Mat(xh, xw, 3);
+        Size newSize = mat.size();
+        //利用resize函数缩小/放大
+        resize(clone, mat, newSize);
+        imwrite("img/testResize.jpg", mat);
+        System.out.println(height +" : "+width +" , " + newSize.height() + " : "+ newSize.width());
+        //在相同的画布上进行缩放. 注意通道要一致, 指定北京为白色
+        Mat sameMat = new Mat(height, width, CV_8UC3,AbstractScalar.WHITE);
+        //放在中中间的位置
+        Mat cutMat = sameMat.apply(new Rect((width - xw) / 2, (height - xh) / 2, xw, xh));
+        //让两个画布大小一致. 如果已经一致了也可以执行这个方法.
+        resize(mat, mat, cutMat.size());
+        mat.copyTo(cutMat);
+        imwrite("img/testResizeSameMat.jpg", sameMat);
+
+        ///利用resize制作缩放大小视频
+        int ftp = 25;
+        int tmpHeight = height;
+        List<Mat> lsMat = new ArrayList<>();
+        lsMat.add(clone.clone());
+        int photos = 10;
+        //重置一个新的画布.
+        sameMat = new Mat(height, width, CV_8UC3,AbstractScalar.WHITE);
+        while (tmpHeight > 5){
+            clone = clone.clone();
+            tmpHeight --;
+            double tmpWidthMul =(double) height /  (double)tmpHeight;
+            int tmpWidth = (int)Math.floor((double)width / (double) tmpWidthMul);;
+            logger.info("th:{}, tw: {}",tmpHeight, tmpWidth);
+            Mat tmpMat = new Mat((int)tmpHeight, (int)tmpWidth, 3);
+            Size tmpSize = tmpMat.size();
+            //这样不会使图片模糊.
+            resize(clone, tmpMat, tmpSize);
+
+            Mat newSameMat = sameMat.clone();
+            //放到中心位置
+            Mat childMat = newSameMat
+                    .apply(new Rect(((int)((width - tmpWidth) /  2.00)), (int) ((height - tmpHeight) / 2.00), (int)tmpWidth, (int)tmpHeight));
+            resize(childMat,childMat, tmpSize);
+            tmpMat.copyTo(childMat);
+            if(photos > 0){
+                photos--;
+                //imwrite("img/more/testResizeSameMat"+tmpHeight+".jpg", newSameMat);
+                //imwrite("img/more/testResizeSameMat_"+tmpHeight+".jpg", tmpMat);
+            }
+
+            lsMat.add(newSameMat);
+
+        }
+
+        int fourcc = VideoWriter.fourcc("M".getBytes()[0], "J".getBytes()[0], "P".getBytes()[0], "G".getBytes()[0]);
+        int fpt = 25;
+        VideoWriter videoWriter = new VideoWriter("img/openCV_video3.avi", fourcc, fpt, size);
+        for(Mat tmpMap : lsMat){
+            videoWriter.write(tmpMap.clone());
+        }
+
+        for(int l = lsMat.size()-1; l >= 0; l--){
+            videoWriter.write(lsMat.get(l).clone());
+        }
         videoWriter.release();
 
     }
+
+    /**
+     * 修改图片的透明度
+     */
+    @Test
+    public void testImgOpacity(){
+        Mat clone = imread.clone();
+        //将图像转为 BGRA 格式
+        CvScalar p1, p2;
+        Mat mat = new Mat();
+        cvtColor(clone, mat, COLOR_BGR2BGRA);
+        int rows = mat.rows();
+        int cols = mat.cols();
+        for(int i=0; i< rows; i++){
+            for(int c = 0; c < cols; c++){
+                BytePointer ptr = mat.ptr(i, c);
+                ptr.put( 3, (byte)1);
+                ptr.close();
+            }
+        }
+        imwrite("img/testImgOpacity.jpg", mat);
+    }
+
 
 
 
