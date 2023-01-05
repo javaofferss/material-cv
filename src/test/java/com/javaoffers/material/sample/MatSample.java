@@ -185,15 +185,24 @@ public class MatSample {
         Mat newMat = getRotationMatrix2D(point, 45, 1);
         // 输入,输出,旋转,大小
         Mat des = copy.clone();
-        warpAffine(copy, des, newMat, copy.size());
+        Size size = copy.size();
+        warpAffine(copy, des, newMat, size);
         imwrite("img/rotationMatrix2D.jpg", des);
 
-        //没有输出视频
-        int fourcc = VideoWriter.fourcc("m".getBytes()[0], "p".getBytes()[0], "4".getBytes()[0], "v".getBytes()[0]);
+        /**
+         * mjpeg是视频，就是由系列jpg图片组成的视频。
+         */
+        int fourcc = VideoWriter.fourcc("M".getBytes()[0], "J".getBytes()[0], "P".getBytes()[0], "G".getBytes()[0]);
         int fpt = 25;
-        VideoWriter videoWriter = new VideoWriter("img/video.mp4", fourcc, fpt, copy.size());
-        videoWriter.write(copy);
-        videoWriter.write(des);
+        VideoWriter videoWriter = new VideoWriter("img/video.avi", fourcc, fpt, size);
+        int time = 2;
+        int photos = 2 * 25;
+        while (photos > 0){
+            videoWriter.write(copy.clone());
+            videoWriter.write(des.clone());
+            photos--;
+        }
+
         videoWriter.release();
 
     }
