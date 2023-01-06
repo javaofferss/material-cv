@@ -287,7 +287,7 @@ public class MatSample {
     }
 
     /**
-     * 修改图片的透明度
+     * 修改图片的透明v 度
      */
     @Test
     public void testImgOpacity(){
