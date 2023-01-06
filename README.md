@@ -3,4 +3,4 @@
 openCV + OCR 光学字符识别（Optical Character Recognition）
 
 - ubuntu 需要安装 tesseract-ocr
-- ubuntu 不需要安装opencv. 直接使用javacv
+- ubuntu 不需要安装opencv. 直接使用opencv
