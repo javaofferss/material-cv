@@ -1,12 +1,14 @@
 package com.javaoffers.material.sample;
 
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_highgui;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_videoio.VideoWriter;
 import org.junit.Test;
 import org.opencv.core.Core;
 import org.opencv.core.MatOfInt;
+import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,11 +45,12 @@ public class MatSample {
     static Logger logger = LoggerFactory.getLogger("MatSample");
 
     Mat imread = imread("img/dog.png");
+
     /**
      * 加载图像
      */
     @Test
-    public void tesImread() throws Exception{
+    public void tesImread() throws Exception {
         //System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         Mat mat = imread("img/dog.png");
         logger.info("witdh:{}, height:{}, type: {}", mat.arrayWidth(), mat.arrayHeight(), mat.type());
@@ -66,13 +69,13 @@ public class MatSample {
         boolean imwrite2 = imwrite("img/rectDog.png", rect);
 
         //把rect设置为模糊, 第一个rect为输入，第二个rect为输出， Size为像素大小
-        blur(rect,rect, new Size(25,25));
+        blur(rect, rect, new Size(25, 25));
         //注意子mat像素被修改后也会影响父mat中对应子mat的区域
         imwrite("img/blurDog.png", mat2);
 
         //CV_8UC3 可以理解 每个像素点在内存空间所占的空间大小8bite。使用3通道
         // r g b . 可以利用RGB去创建 scalar,
-        Scalar scalar = RGB(255,   0,   0);
+        Scalar scalar = RGB(255, 0, 0);
         Mat newMat = new Mat(200, 300, CV_8UC3, RGB(0, 0, 0));
         Mat subMat = newMat.apply(new Rect(0, 0, 150, 200));
         Mat scalarMat = new Mat(200, 100, CV_8UC3, scalar);
@@ -85,7 +88,7 @@ public class MatSample {
         Mat dogLeft = mat.clone();
         Mat leftMat = newMat.apply(new Rect(0, 0, 150, 200));
         //重置大小
-        resize(dogLeft,dogLeft, leftMat.size());
+        resize(dogLeft, dogLeft, leftMat.size());
         Mat dogRight = mat.clone();
         Mat rightMat = newMat.apply(new Rect(150, 0, 150, 200));
         //重置大小
@@ -100,28 +103,28 @@ public class MatSample {
      * 另一个方法可以放大/缩小
      */
     @Test
-    public void testMatResize(){
+    public void testMatResize() {
         Mat clone = imread.clone();
         //只保留行数. 可用于横向截取
-        clone.resize(imread.arrayHeight()/2);
-        imwrite("img/testShrink.jpg",clone);
+        clone.resize(imread.arrayHeight() / 2);
+        imwrite("img/testShrink.jpg", clone);
 
         clone = imread.clone();
-        Scalar scalar = RGB(255,   255,   255);
+        Scalar scalar = RGB(255, 255, 255);
         //这里的scalar好像不起作用
-        clone.resize(imread.arrayHeight()/2, scalar);
-        imwrite("img/testShrink2.jpg",clone);
+        clone.resize(imread.arrayHeight() / 2, scalar);
+        imwrite("img/testShrink2.jpg", clone);
     }
 
     @Test
-    public void testReshape(){
+    public void testReshape() {
         Mat clone = imread.clone();
         int i = clone.arrayWidth();
         //只能为1,3,4
         //1: 行不变列会增加. 并为为灰色
         Mat reshape = clone.reshape(1);
         int i1 = reshape.arrayWidth();
-        System.out.println(i +" : "+ i1);//701 : 2103 扩大了3倍
+        System.out.println(i + " : " + i1);//701 : 2103 扩大了3倍
         imwrite("img/testReshape.jpg", reshape);
 
         clone = imread.clone();
@@ -129,7 +132,7 @@ public class MatSample {
         //没有任何变化
         reshape = clone.reshape(3);
         i1 = reshape.arrayWidth();
-        System.out.println(i +" : "+ i1);//701 : 701
+        System.out.println(i + " : " + i1);//701 : 701
         imwrite("img/testReshape3.jpg", reshape);
 
 
@@ -137,28 +140,28 @@ public class MatSample {
         clone = imread.clone();
         reshape = clone.reshape(4);
         i1 = reshape.arrayWidth();
-        System.out.println(i +" : "+ i1);//701 : 1
+        System.out.println(i + " : " + i1);//701 : 1
         imwrite("img/testReshape4.jpg", reshape);
 
         //不会输出文件.
         clone = imread.clone();
-        reshape = clone.reshape(0,1);
+        reshape = clone.reshape(0, 1);
         i1 = reshape.arrayWidth();
-        System.out.println(i +" : "+ i1);//701 : 280400
+        System.out.println(i + " : " + i1);//701 : 280400
         imwrite("img/testReshape0_1.jpg", reshape);
 
         //不会输出文件.
         clone = imread.clone();
-        reshape = clone.reshape(1,1);
+        reshape = clone.reshape(1, 1);
         i1 = reshape.arrayWidth();
-        System.out.println(i +" : "+ i1);//701 : 841200
+        System.out.println(i + " : " + i1);//701 : 841200
         imwrite("img/testReshape1_1.jpg", reshape);
 
         //不会输出文件.
         clone = imread.clone();
-        reshape = clone.reshape(3,1);
+        reshape = clone.reshape(3, 1);
         i1 = reshape.arrayWidth();
-        System.out.println(i +" : "+ i1);//701 : 280400
+        System.out.println(i + " : " + i1);//701 : 280400
         imwrite("img/testReshape3_1.jpg", reshape);
         /**
          * 更多讲解:https://ispacesoft.com/50726.html
@@ -174,10 +177,10 @@ public class MatSample {
      * 旋转并生成视频
      */
     @Test
-    public void testImg2Video(){
+    public void testImg2Video() {
         Mat imread = imread("img/dog.png");
         Mat copy = imread.clone();
-        int w2 = copy.arrayWidth()/ 2;
+        int w2 = copy.arrayWidth() / 2;
         int h2 = copy.arrayHeight() / 2;
         Point2f point = new Point2f(w2, h2);
         // cv2.getRotationMatrix2D(center,angle,scale)
@@ -203,7 +206,7 @@ public class MatSample {
         VideoWriter videoWriter = new VideoWriter("img/video.avi", fourcc, fpt, size);
         int time = 2;
         int photos = 2 * 25;
-        while (photos > 0){
+        while (photos > 0) {
             videoWriter.write(copy.clone());
             videoWriter.write(des.clone());
             photos--;
@@ -215,7 +218,7 @@ public class MatSample {
      * 缩放. 并生成动画
      */
     @Test
-    public void testResize(){
+    public void testResize() {
         Mat clone = imread.clone();
         Size size = clone.size();
         int height = size.height();
@@ -227,9 +230,9 @@ public class MatSample {
         //利用resize函数缩小/放大
         resize(clone, mat, newSize);
         imwrite("img/testResize.jpg", mat);
-        System.out.println(height +" : "+width +" , " + newSize.height() + " : "+ newSize.width());
+        System.out.println(height + " : " + width + " , " + newSize.height() + " : " + newSize.width());
         //在相同的画布上进行缩放. 注意通道要一致, 指定北京为白色
-        Mat sameMat = new Mat(height, width, CV_8UC3,AbstractScalar.WHITE);
+        Mat sameMat = new Mat(height, width, CV_8UC3, AbstractScalar.WHITE);
         //放在中中间的位置
         Mat cutMat = sameMat.apply(new Rect((width - xw) / 2, (height - xh) / 2, xw, xh));
         //让两个画布大小一致. 如果已经一致了也可以执行这个方法.
@@ -244,14 +247,15 @@ public class MatSample {
         lsMat.add(clone.clone());
         int photos = 10;
         //重置一个新的画布.
-        sameMat = new Mat(height, width, CV_8UC3,AbstractScalar.WHITE);
-        while (tmpHeight > 5){
+        sameMat = new Mat(height, width, CV_8UC3, AbstractScalar.WHITE);
+        while (tmpHeight > 5) {
             clone = clone.clone();
-            tmpHeight --;
-            double tmpWidthMul =(double) height /  (double)tmpHeight;
-            int tmpWidth = (int)Math.floor((double)width / (double) tmpWidthMul);;
-            logger.info("th:{}, tw: {}",tmpHeight, tmpWidth);
-            Mat tmpMat = new Mat((int)tmpHeight, (int)tmpWidth, 3);
+            tmpHeight--;
+            double tmpWidthMul = (double) height / (double) tmpHeight;
+            int tmpWidth = (int) Math.floor((double) width / (double) tmpWidthMul);
+            ;
+            logger.info("th:{}, tw: {}", tmpHeight, tmpWidth);
+            Mat tmpMat = new Mat((int) tmpHeight, (int) tmpWidth, 3);
             Size tmpSize = tmpMat.size();
             //这样不会使图片模糊.
             resize(clone, tmpMat, tmpSize);
@@ -259,10 +263,10 @@ public class MatSample {
             Mat newSameMat = sameMat.clone();
             //放到中心位置
             Mat childMat = newSameMat
-                    .apply(new Rect(((int)((width - tmpWidth) /  2.00)), (int) ((height - tmpHeight) / 2.00), (int)tmpWidth, (int)tmpHeight));
-            resize(childMat,childMat, tmpSize);
+                    .apply(new Rect(((int) ((width - tmpWidth) / 2.00)), (int) ((height - tmpHeight) / 2.00), (int) tmpWidth, (int) tmpHeight));
+            resize(childMat, childMat, tmpSize);
             tmpMat.copyTo(childMat);
-            if(photos > 0){
+            if (photos > 0) {
                 photos--;
                 //imwrite("img/more/testResizeSameMat"+tmpHeight+".jpg", newSameMat);
                 //imwrite("img/more/testResizeSameMat_"+tmpHeight+".jpg", tmpMat);
@@ -275,11 +279,11 @@ public class MatSample {
         int fourcc = VideoWriter.fourcc("M".getBytes()[0], "J".getBytes()[0], "P".getBytes()[0], "G".getBytes()[0]);
         int fpt = 25;
         VideoWriter videoWriter = new VideoWriter("img/openCV_video3.avi", fourcc, fpt, size);
-        for(Mat tmpMap : lsMat){
+        for (Mat tmpMap : lsMat) {
             videoWriter.write(tmpMap.clone());
         }
 
-        for(int l = lsMat.size()-1; l >= 0; l--){
+        for (int l = lsMat.size() - 1; l >= 0; l--) {
             videoWriter.write(lsMat.get(l).clone());
         }
         videoWriter.release();
@@ -290,26 +294,45 @@ public class MatSample {
      * 修改图片的透明v 度
      */
     @Test
-    public void testImgOpacity(){
+    public void testImgOpacity() {
         Mat clone = imread.clone();
         //将图像转为 BGRA 格式
         CvScalar p1, p2;
         Mat mat = new Mat();
+        //转换成4通道, 第四个通道为透明通道, 下标是3
         cvtColor(clone, mat, COLOR_BGR2BGRA);
         int rows = mat.rows();
         int cols = mat.cols();
-        for(int i=0; i< rows; i++){
-            for(int c = 0; c < cols; c++){
-                BytePointer ptr = mat.ptr(i, c);
-                ptr.put( 3, (byte)1);
-                ptr.close();
+        for (int i = 0; i < rows; i++) {
+            for (int c = 0; c < cols; c++) {
+                BytePointer ptr1 = mat.ptr(i, c);
+                ptr1.put(3, (byte) 100);
             }
         }
-        imwrite("img/testImgOpacity.jpg", mat);
+        // 要输出格式为png, 不能输出jpg, 否则透明将失效
+        //因为jpg格式的图片不支持透明效果。可以保存为PNG格式或GIF格式的图片。
+        imwrite("img/testImgOpacity.png", mat);
+        opencv_highgui.waitKey(0);
+
     }
 
+    @Test
+    public void testDraw(){
+        //  绘制值线
+        Mat clone = imread.clone();
+        Point point = new Point(100);
+        point.x(150);
+        point.y(50);
+
+        Point endPoint = new Point(100);
+        endPoint.x(250);
+        endPoint.y(50);
+
+        line(clone, point, endPoint, Scalar.BLUE);
+        imwrite("img/line.png", clone);
 
 
+    }
 
 
 
