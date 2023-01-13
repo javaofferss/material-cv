@@ -331,8 +331,15 @@ public class MatSample {
         line(clone, point, endPoint, Scalar.BLUE);
         imwrite("img/line.png", clone);
 
+        //矩形
+        clone = imread.clone();
+        Rect rect = new Rect(clone.arrayWidth() / 2, clone.arrayHeight() / 2, 100, 100);
+        rectangle(clone,rect, Scalar.BLACK);
 
-    }
+        imwrite("img/rect.jpg", clone);
+
+        //画一个原型
+
 
 
 
