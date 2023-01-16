@@ -317,7 +317,7 @@ public class MatSample {
     }
 
     @Test
-    public void testDraw(){
+    public void testDrawAndWrite(){
         //  绘制值线
         Mat clone = imread.clone();
         Point point = new Point(100);
@@ -339,7 +339,46 @@ public class MatSample {
         imwrite("img/rect.jpg", clone);
 
         //画一个原型
+        //TODO
+        //写一个文字
+        clone = imread.clone();
+        //指定一个点,从这个点开始写
+        Point writePoint = new Point(100);
+        writePoint.x(250);
+        writePoint.y(100);
+        //fontScale：字体缩放比例因子, fontFace: 字体类型,thickness：线条粗细，单位为像素数, bottomLeftOrigin：可选参数，默认值 True 表示数据原点位于左下角，False 表示位于左上角
+        putText(clone, "hello", writePoint, FONT_HERSHEY_SIMPLEX, 2.0, Scalar.WHITE, 5, LINE_8,false);
+        imwrite("img/putText.jpg", clone);
+    }
 
+    /**
+     * 融合两张图片
+     */
+    @Test
+    public void testAddWeighted(){
+        Mat clone = imread.clone();
+
+        //截取一个border-radio
+        Rect rect = new Rect(100, clone.arrayHeight() - 100, 200, 80);
+        Mat cutMat = clone.apply(rect);
+
+        Point writePoint = new Point(100);
+        writePoint.x(5);
+        writePoint.y(60);//从这个位置开始写
+        Mat mat = cutMat.clone();
+        //31,35,41
+        mat.put(RGB(45, 50, 61));
+        putText(mat, "hello", writePoint, FONT_HERSHEY_SIMPLEX, 2.0, Scalar.WHITE, 2, LINE_8,false);
+        addWeighted(mat, 0.2, cutMat, 0.95, 0.2, mat);
+        //addWeighted(mat, 0.95, cutMat, 0.2, 0.2, mat);
+        mat.copyTo(cutMat);
+        imwrite("img/testBarrage.png", clone);
+
+
+
+
+
+    }
 
 
 
