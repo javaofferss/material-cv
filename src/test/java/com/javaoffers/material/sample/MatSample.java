@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
@@ -350,6 +351,7 @@ public class MatSample {
         putText(clone, "hello", writePoint, FONT_HERSHEY_SIMPLEX, 2.0, Scalar.WHITE, 5, LINE_8,false);
         imwrite("img/putText.jpg", clone);
     }
+    
 
     /**
      * 融合两张图片
@@ -369,15 +371,65 @@ public class MatSample {
         //31,35,41
         mat.put(RGB(45, 50, 61));
         putText(mat, "hello", writePoint, FONT_HERSHEY_SIMPLEX, 2.0, Scalar.WHITE, 2, LINE_8,false);
-        addWeighted(mat, 0.2, cutMat, 0.95, 0.2, mat);
-        //addWeighted(mat, 0.95, cutMat, 0.2, 0.2, mat);
+        //addWeighted(mat, 0.2, cutMat, 0.95, 0.2, mat);
+        addWeighted(mat, 0.95, cutMat, 0.2, 0.2, mat);
         mat.copyTo(cutMat);
         imwrite("img/testBarrage.png", clone);
 
+    }
 
+    /**
+     * border-radius. 实现原理是: 截取左边部分和height一样的一个正方形.
+     * 假设这个正方形中有个一个圆(如果是左边做圆角,那么就是左半圆), 我们遍
+     * 历每一个像素点,并计算与这个圆中心的距离是否大于半径, 如果大于则将像素
+     * 点置为白色.设置透明度(如果需要). 核心思想是利用圆的半径去做. 会用到
+     * 勾股定理
+     */
+    @Test
+    public void testCornerRadius(){
+        Mat src = imread.clone();
+        cvtColor(src, src, COLOR_BGR2BGRA);
+        Rect rect = new Rect(100, src.arrayHeight() - 100, 200, 80);
+        Mat cutMat = src.apply(rect);
 
+        //找到左上角
+        Mat left = cutMat.apply(new Rect(0, 0, 80, 80));
+        int rows = left.rows();
+        int cols = left.cols()/2;
+        int y = rows;
+        int x = cols;
+        for(int i = 0; i < y ; i++){//行保持不动,从列开始由左往右
+            for(int j = 0; j < x; j++){
+                //勾股定理计算到圆中心的距离, 这里的40是height的一半(也就是半径)
+                double sqrt = Math.sqrt(Math.pow((40 - j), 2) + Math.pow((40 - i), 2));
 
+                if((int)sqrt > 40){ //这里将sqrt转换为int, 出来的效果会更好
+                    BytePointer ptr = left.ptr(i, j);
+                    ptr.put(0,(byte)255);
+                    ptr.put(1,(byte)255);
+                    ptr.put(2,(byte)255);
+                    ptr.put(3,(byte)100);
+                    logger.info("sqrt:{}", sqrt);
+                }
+            }
+        }
 
+        Mat right = cutMat.apply(new Rect(cutMat.arrayWidth()-80, 0, 80, 80));
+        for(int i = 0; i < y; i++){ //行保持不动,从列开始由左往右
+             for(int j = 40; j < cols * 2 ; j++){
+                 double sqrt = Math.sqrt((Math.pow((i - 40), 2) + Math.pow((40 - j), 2)));
+                 if((int)sqrt > 40){ //40为半径
+                     BytePointer ptr = right.ptr(i, j);
+                     ptr.put(0,(byte)255);
+                     ptr.put(1,(byte)255);
+                     ptr.put(2,(byte)255);
+                     ptr.put(3,(byte)100);
+                     logger.info("sqrt:{}", sqrt);
+                 }
+             }
+        }
+
+        imwrite("img/testCornerRadius.png", cutMat);
     }
 
 
