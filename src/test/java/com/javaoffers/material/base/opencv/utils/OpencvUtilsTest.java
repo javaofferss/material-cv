@@ -2,6 +2,7 @@ package com.javaoffers.material.base.opencv.utils;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.Test;
 
 import static org.bytedeco.opencv.global.opencv_imgcodecs.imread;
@@ -90,5 +91,23 @@ public class OpencvUtilsTest {
         OpencvUtils.cornersCircles(apply, clone);
 
         imwrite("img/testCornersCircles.png", apply);
+    }
+
+    @Test
+    public void drawStar() {
+        for(int i = 0 ; i < 10; i++){
+            double x = Math.random() * (imread.arrayWidth() * 1.0);
+            double y = Math.random() * (imread.arrayHeight() * 1.0);
+            int size = (int)(Math.random() * 100.0);
+            size = size == 0 ? 100 : size;
+            try {
+                OpencvUtils.drawStar(imread, (int)x, (int)y, size, size / 6, Scalar.WHITE, (int)(10.0 * Math.random()) + 5);
+            }catch (Exception e){
+                //e.printStackTrace();
+            }
+
+        }
+
+        imwrite("img/drawStar.png", imread);
     }
 }

@@ -52,27 +52,27 @@ public class BarrageAbilityExecutor implements AbilityExecutor<BarrageMetaSource
                 Mat nMat = null;
 
                 nMat = parseMat(clone, height, text, paddingLeft, i,"#4c3c2c");
-                //当出现到80时,出现下一个text. (两个text同时出现)
+                //When it reaches 80, the next text appears. (Two texts appear at the same time)
                 int showSecond = 80;
                 if (i > showSecond && ti < source.getText().size() - 1) {
                     if(i > 100){
                         int t = 20 -(120 -i);
-                        double d = t * 0.02; // 0.02 = 0.4 / 20. (因为20最后20个mat, 要做到alpha: 0.4, 0.6)
+                        double d = t * 0.02; // 0.02 = 0.4 / 20. (Because the last 20 mats of 20 need to achieve alpha: 0.4, 0.6)
                         OpencvUtils.fusion(nMat, 0.5 - d, clone, 0.5 + d, 0, nMat);
                     }
-                    int h = i - showSecond; // 第二个出现的高度
+                    int h = i - showSecond; // the height of the second occurrence
                     Mat nMat2 = parseMat(clone, height, source.getText().get(ti + 1), paddingLeft, h,"#4c3c2c");
                     OpencvUtils.fusion(nMat, 0.5, nMat2, 0.5, 0, nMat);
                     lastH = h;
 
                 } else {
-                    //可用fusion更改透明度
+                    //Transparency can be changed with fusion
                     OpencvUtils.fusion(nMat, 0.5, clone, 0.5, 0, nMat);
                 }
                 mats.add(nMat);
             }
         }
-        //写入视频
+        //write video
         if (mats.size() > 0) {
             OpencvUtils.writeVideoFromJpg(source.getDesFilePath(), mats, fps);
         }

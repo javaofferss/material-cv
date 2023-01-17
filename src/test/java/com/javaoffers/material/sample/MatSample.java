@@ -1,5 +1,6 @@
 package com.javaoffers.material.sample;
 
+import com.javaoffers.material.base.opencv.utils.OpencvUtils;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_highgui;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
@@ -330,18 +331,33 @@ public class MatSample {
         endPoint.x(250);
         endPoint.y(50);
 
+        //值线条
         line(clone, point, endPoint, Scalar.BLUE);
         imwrite("img/line.png", clone);
+
+        //带有箭头的线
+        arrowedLine(clone, point, endPoint, Scalar.BLUE);
+        imwrite("img/arrowedLine.png", clone);
 
         //矩形
         clone = imread.clone();
         Rect rect = new Rect(clone.arrayWidth() / 2, clone.arrayHeight() / 2, 100, 100);
         rectangle(clone,rect, Scalar.BLACK);
-
         imwrite("img/rect.jpg", clone);
 
         //画一个原型
-        //TODO
+        Point centerPoint = new Point(clone.arrayWidth() / 2, clone.arrayHeight() / 2);
+        circle(clone,centerPoint, clone.arrayHeight()/2, Scalar.BLACK);
+        imwrite("img/circle.jpg", clone);
+
+        //画个椭圆 ellipse
+        ellipse(clone, centerPoint, new Size(clone.arrayWidth() / 2, clone.arrayHeight()/2), 360, 0, 360,Scalar.BLUE );
+        imwrite("img/ellipse.jpg", clone);
+
+        // 绘制标记. 绘制一个star. 后面的数字是默认值.
+        drawMarker(clone, centerPoint, Scalar.CYAN, MARKER_STAR, 50, 1, 8);
+        imwrite("img/drawMarker.jpg", clone);
+
         //写一个文字
         clone = imread.clone();
         //指定一个点,从这个点开始写
@@ -351,6 +367,15 @@ public class MatSample {
         //fontScale：字体缩放比例因子, fontFace: 字体类型,thickness：线条粗细，单位为像素数, bottomLeftOrigin：可选参数，默认值 True 表示数据原点位于左下角，False 表示位于左上角
         putText(clone, "hello", writePoint, FONT_HERSHEY_SIMPLEX, 2.0, Scalar.WHITE, 5, LINE_8,false);
         imwrite("img/putText.jpg", clone);
+    }
+
+    //这个不好测试.
+    @Test
+    public void test(){
+        //填充多边形, 这个比较麻烦.
+        Mat clone = imread.clone();
+        fillPoly(clone, new MatVector(clone.clone()), Scalar.BLUE);
+        imwrite("img/fillPoly.jpg", clone);
     }
 
 
@@ -372,8 +397,8 @@ public class MatSample {
         //31,35,41
         mat.put(RGB(45, 50, 61));
         putText(mat, "hello", writePoint, FONT_HERSHEY_SIMPLEX, 2.0, Scalar.WHITE, 2, LINE_8,false);
-        //addWeighted(mat, 0.2, cutMat, 0.95, 0.2, mat);
-        addWeighted(mat, 0.95, cutMat, 0.2, 0.2, mat);
+        //addWeighted(mat, 0.2, cutMat, 0.95, 0.04, mat); 0.95 + 0.05 = 1
+        addWeighted(mat, 0.95, cutMat, 0.05, 0.2, mat);
         mat.copyTo(cutMat);
         imwrite("img/testBarrage.png", clone);
 
@@ -444,6 +469,91 @@ public class MatSample {
             GaussianBlur(clone,clone, new Size(23,23), 17.0,17.0,1);
         }
         imwrite("img/gusiblur.jpg", clone);
+    }
+
+    /**
+     * 制作一个小星星
+     */
+    @Test
+    public void makeStar(){
+        Mat clone = imread.clone();
+        Mat cut = clone.apply(new Rect(0, 0, 50, 50)); // 100 是整个star的大小
+        Scalar scalar = Scalar.WHITE;
+        //cut.put(Scalar.BLACK);
+        int wd = 5;// 可以控制四个角的大小
+        int radius = wd / 2 ; //半径
+
+        int centerX = cut.arrayWidth() / 2;
+        int centerY = cut.arrayHeight() / 2;
+
+        Point leftPoint1 = new Point(centerX - radius, centerY - radius); //左上角
+        Point leftPoint2 = new Point(centerX - radius, centerY + radius); //左下角
+        Point rightPoint1 = new Point(centerX + radius, centerY - radius); //右上角
+        Point rightPoint2 = new Point(centerX + radius, centerY + radius); //右下角
+
+        //边上四个中点
+        Point upPoint = new Point(centerX, 0);
+        Point downPoint = new Point(centerX, cut.arrayHeight());
+        Point leftPoint = new Point(0, centerY);
+        Point rightPoint = new Point(cut.arrayWidth(), centerY);
+
+        //绘制四个角
+        line(cut, upPoint, leftPoint1, Scalar.WHITE );
+        for(int i=0; i< radius * 2; i++){
+            Point leftPoint1Go = new Point(centerX - radius + i, centerY - radius); //不断接近左上角
+            line(cut, upPoint, leftPoint1Go, Scalar.WHITE );
+        }
+        line(cut, upPoint, rightPoint1, Scalar.WHITE );
+
+
+        line(cut, downPoint, leftPoint2, Scalar.WHITE );
+        for(int i=0; i< radius * 2; i++){
+            Point leftPoint2GO = new Point(centerX - radius + i, centerY + radius); //不断接近右下角
+            line(cut, downPoint, leftPoint2GO, Scalar.WHITE );
+        }
+        line(cut, downPoint, rightPoint2, Scalar.WHITE );
+
+
+        line(cut, leftPoint, leftPoint1, Scalar.WHITE );
+        for(int i=0; i< radius * 2; i++){
+            Point leftPoint1Go = new Point(centerX - radius, centerY - radius + i); //不断接近左下角
+            line(cut, leftPoint, leftPoint1Go, Scalar.WHITE );
+        }
+        line(cut, leftPoint, leftPoint2, Scalar.WHITE );
+
+
+        line(cut, rightPoint, rightPoint1, Scalar.WHITE );
+        for(int i=0; i< radius * 2; i++){
+            Point rightPoint1Go = new Point(centerX + radius, centerY - radius + i); //不断接近右下角
+            line(cut, rightPoint, rightPoint1Go, Scalar.WHITE );
+        }
+        line(cut, rightPoint, rightPoint2, Scalar.WHITE );
+
+        wd = (int)Math.floor(wd * 1.2); //让圆大一点.
+        radius = wd / 2 ; //半径, 重新计算半径
+        int pointX = centerX  - radius;
+        int pointY = centerY  - radius;
+        Mat radioCut = cut.apply(new Rect(pointX, pointY, wd, wd));
+        int x = radioCut.cols();
+        int y = radioCut.rows();
+        int radio = (int) Math.floor(radioCut.arrayWidth() / 2.0);
+        for(int i = 0; i < y; i++){
+            for(int j = 0; j < x; j++){
+                BytePointer ptr = radioCut.ptr(i, j);
+                double distance = Math.sqrt(Math.pow((radio - i),2) + Math.pow((radio - j),2));
+                if(distance < (radio)){
+                    ptr.put(0, (byte)255);
+                    ptr.put(1, (byte)255);
+                    ptr.put(2, (byte)255);
+                    logger.info("true");
+                }
+            }
+        }
+        //次数与多越模糊
+        OpencvUtils.gaussianBlur(cut, 5, 1, 10); // count 决定模糊程度
+//        imwrite("img/cutStar.png", cut);
+        imwrite("img/cutStar.png", clone);
+
     }
 
 

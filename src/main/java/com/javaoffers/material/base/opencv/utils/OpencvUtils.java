@@ -262,4 +262,129 @@ public class OpencvUtils {
             GaussianBlur(src,src, new Size(range,range), sigma, sigma,1);
         }
     }
+
+    /**
+     * 画小星星
+     * @param mat 原mar
+     * @param xMat 坐标位置x
+     * @param yMat 坐标位置y
+     * @param drawSize 星星的大小
+     * @param angleSize 角的大小
+     * @param scalar 星星的颜色
+     * @param gusiCount 星星的模糊度
+     */
+    public static void drawStar(Mat mat, int xMat, int yMat, int drawSize, int angleSize, Scalar scalar, int gusiCount){
+        Mat clone = mat;
+        Mat cut = clone.apply(new Rect(xMat, yMat, drawSize, drawSize)); // 100 是整个star的大小
+        Mat fillMat = cut.clone();
+        //cut.put(Scalar.BLACK);
+        int wd = angleSize;// 可以控制四个角的大小
+        int radius = wd / 2 ; //半径
+
+        int centerX = cut.arrayWidth() / 2;
+        int centerY = cut.arrayHeight() / 2;
+
+        Point leftPoint1 = new Point(centerX - radius, centerY - radius); //左上角
+        Point leftPoint2 = new Point(centerX - radius, centerY + radius); //左下角
+        Point rightPoint1 = new Point(centerX + radius, centerY - radius); //右上角
+        Point rightPoint2 = new Point(centerX + radius, centerY + radius); //右下角
+
+        //边上四个中点
+        Point upPoint = new Point(centerX, 0);
+        Point downPoint = new Point(centerX, cut.arrayHeight());
+        Point leftPoint = new Point(0, centerY);
+        Point rightPoint = new Point(cut.arrayWidth(), centerY);
+
+        //绘制四个角
+        line(cut, upPoint, leftPoint1, scalar);
+        for(int i=0; i< radius * 2; i++){
+            Point leftPoint1Go = new Point(centerX - radius + i, centerY - radius); //不断接近左上角
+            line(cut, upPoint, leftPoint1Go,scalar );
+        }
+        line(cut, upPoint, rightPoint1, scalar );
+
+
+        line(cut, downPoint, leftPoint2, scalar );
+        for(int i=0; i< radius * 2; i++){
+            Point leftPoint2GO = new Point(centerX - radius + i, centerY + radius); //不断接近右下角
+            line(cut, downPoint, leftPoint2GO, scalar );
+        }
+        line(cut, downPoint, rightPoint2, scalar );
+
+
+        line(cut, leftPoint, leftPoint1, scalar);
+        for(int i=0; i< radius * 2; i++){
+            Point leftPoint1Go = new Point(centerX - radius, centerY - radius + i); //不断接近左下角
+            line(cut, leftPoint, leftPoint1Go, scalar );
+        }
+        line(cut, leftPoint, leftPoint2, scalar );
+
+
+        line(cut, rightPoint, rightPoint1, scalar );
+        for(int i=0; i< radius * 2; i++){
+            Point rightPoint1Go = new Point(centerX + radius, centerY - radius + i); //不断接近右下角
+            line(cut, rightPoint, rightPoint1Go, scalar );
+        }
+        line(cut, rightPoint, rightPoint2, scalar);
+
+        wd = (int)Math.floor(wd * 1.2); //让圆大一点.
+        radius = wd / 2 ; //半径, 重新计算半径
+        int pointX = centerX  - radius;
+        int pointY = centerY  - radius;
+        Mat radioCut = cut.apply(new Rect(pointX, pointY, wd, wd));
+        int x = radioCut.cols();
+        int y = radioCut.rows();
+        int radio = (int) Math.floor(radioCut.arrayWidth() / 2.0);
+        for(int i = 0; i < y; i++){
+            for(int j = 0; j < x; j++){
+                BytePointer ptr = radioCut.ptr(i, j);
+                double distance = Math.sqrt(Math.pow((radio - i),2) + Math.pow((radio - j),2));
+                if(distance < (radio)){
+                    ptr.put(0, (byte)scalar.get(0));
+                    ptr.put(1, (byte)scalar.get(1));
+                    ptr.put(2, (byte)scalar.get(2));
+                }
+            }
+        }
+        //次数与多越模糊
+        OpencvUtils.gaussianBlur(cut, 5, 1, gusiCount); // count 决定模糊程度
+        //还原部分. 星星周围模糊,但是不能全部模糊, 注意: 这里可以尝试圆切,可能效果会更好一点.
+        int fillX = fillMat.arrayWidth();
+        int fillY = fillMat.arrayHeight();
+        int xl =  centerX - radius;
+        int xr = centerX + radius; //在 xl -xr 之间的忽略
+        int yu = centerY - radius;
+        int yd = centerY + radius; // 在 yu - yd 之间的忽略
+        for(int i = 0; i < fillY; i++){
+            for(int j = 0; j < fillX; j++){
+                BytePointer cutPtr = cut.ptr(i, j);
+                BytePointer fillPtr = fillMat.ptr(i, j);
+                byte r = cutPtr.get(0);
+                byte g = cutPtr.get(1);
+                byte b = cutPtr.get(2);
+
+                byte fr = fillPtr.get(0);
+                byte fg = fillPtr.get(1);
+                byte fb = fillPtr.get(2);
+
+
+
+                if((i > yu && i < yd) || (j > xl && j < xr)){
+                    continue;
+                }
+
+                cutPtr.put(0, fr);
+                cutPtr.put(1, fg);
+                cutPtr.put(2, fb);
+            }
+        }
+        //次数与多越模糊
+        wd = (int)Math.floor(wd * 2); //让圆大一点.
+        radius = wd / 2 ; //半径, 重新计算半径
+        pointX = centerX  - radius;
+        pointY = centerY  - radius;
+        OpencvUtils.gaussianBlur(cutMat(cut, pointX, pointY, wd, wd), 3, 1, 5); // 再次模糊.避免填充带来的机械感
+
+        OpencvUtils.fusion(cut, 0.9, fillMat, 0.1, 0, cut);
+    }
 }

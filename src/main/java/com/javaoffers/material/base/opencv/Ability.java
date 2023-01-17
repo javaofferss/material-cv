@@ -6,4 +6,5 @@ package com.javaoffers.material.base.opencv;
  */
 public enum Ability {
     BARRAGE,//Support barrage, jpg
+    STAR, //shining star
 }
