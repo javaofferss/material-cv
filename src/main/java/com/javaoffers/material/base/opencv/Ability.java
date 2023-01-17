@@ -1,9 +1,9 @@
 package com.javaoffers.material.base.opencv;
 
 /**
- * 支持的能力
+ * ability to support
  * @author mingJie
  */
 public enum Ability {
-    BARRAGE,//支持弹幕
+    BARRAGE,//Support barrage, jpg
 }

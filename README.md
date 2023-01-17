@@ -3,3 +3,7 @@
 #### openCV + OCR 光学字符识别
 - ubuntu 需要安装 tesseract-ocr
 - ubuntu 不需要安装opencv. 直接使用opencv
+
+##### 已经实现的功能
+- 图片文字识别
+- 

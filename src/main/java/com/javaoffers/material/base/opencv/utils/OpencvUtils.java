@@ -19,6 +19,7 @@ import static org.bytedeco.opencv.global.opencv_imgproc.putText;
 
 import org.bytedeco.opencv.opencv_core.*;
 import org.bytedeco.opencv.opencv_imgproc.*;
+import org.bytedeco.opencv.opencv_videoio.VideoWriter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -38,12 +39,20 @@ import static org.bytedeco.opencv.global.opencv_imgproc.*;
 public class OpencvUtils {
 
     //Turn the four corners of the picture into circles
-    public static void cornersCircles(Mat src, double radiusMultiple) {
+    //fillMat 用于填充圆角
+    public static void cornersCircles(Mat src, double radiusMultiple, int opacity, Mat fillMat) {
         //Getheight
         int height = src.arrayHeight();
         int width = src.arrayWidth();
-        cvtColor(src, src, COLOR_BGR2BGRA);//转成4通道,可以设置透明度
+        if(opacity >= 0){
+            cvtColor(src, src, COLOR_BGR2BGRA);//转成4通道,可以设置透明度
+        }
+
         Mat left = src.apply(new Rect(0, 0, height, height));
+        Mat leftFill = null;
+        if(fillMat != null){
+            leftFill = fillMat.apply(new Rect(0, 0, height, height));
+        }
         int rows = left.rows();
         int cols = left.cols() / 2;
         int y = rows;
@@ -56,15 +65,31 @@ public class OpencvUtils {
                 double sqrt = (Math.sqrt(Math.pow((center - j), 2) + Math.pow((center - i), 2)));
                 if (sqrt >= radius) { //转成int效果会更好一点
                     BytePointer ptr = left.ptr(i, j);
-                    ptr.put(0, (byte) 255);
-                    ptr.put(1, (byte) 255);
-                    ptr.put(2, (byte) 255);
-                    ptr.put(3, (byte) 100);
+                    if(leftFill != null){
+                        BytePointer ptrFill = leftFill.ptr(i, j);
+                        ptr.put(0, (byte) ptrFill.get(0));
+                        ptr.put(1, (byte) ptrFill.get(1));
+                        ptr.put(2, (byte) ptrFill.get(2));
+                    }else{
+                        ptr.put(0, (byte) 255);
+                        ptr.put(1, (byte) 255);
+                        ptr.put(2, (byte) 255);
+                    }
+
+                    if(opacity >= 0){
+                        ptr.put(3, (byte) 100);
+                    }
                 }
             }
         }
 
         Mat right = src.apply(new Rect(width - height - 1, 0, height, height)); //这里多减去一个1效果会更好一点
+
+        Mat rightFill = null;
+        if(fillMat != null){
+            rightFill = fillMat.apply(new Rect(width - height - 1, 0, height, height)); //这里多减去一个1效果会更好一点
+        }
+
         int rightWidth = right.arrayWidth();
         int rw2 = rightWidth / 2;
         for (int i = 0; i < y; i++) {
@@ -73,18 +98,44 @@ public class OpencvUtils {
                 double sqrt = (Math.sqrt(Math.pow((center - j), 2) + Math.pow((center - i), 2)));
                 if (sqrt >= radius) {
                     BytePointer ptr = right.ptr(i, j);
-                    ptr.put(0, (byte) 255);
-                    ptr.put(1, (byte) 255);
-                    ptr.put(2, (byte) 255);
-                    ptr.put(3, (byte) 100);
+                    if(rightFill != null){
+                        BytePointer ptrFill = rightFill.ptr(i, j);
+                        ptr.put(0, (byte) ptrFill.get(0));
+                        ptr.put(1, (byte) ptrFill.get(1));
+                        ptr.put(2, (byte) ptrFill.get(2));
+                    }else{
+                        ptr.put(0, (byte) 255);
+                        ptr.put(1, (byte) 255);
+                        ptr.put(2, (byte) 255);
+                    }
+
+                    if(opacity >= 0){
+                        ptr.put(3, (byte) 100);
+                    }
                 }
             }
         }
 
     }
 
+    //两边变圆
     public static void cornersCircles(Mat src) {
-        cornersCircles(src, 0);
+        cornersCircles(src, 0, -1, null);
+    }
+
+    //两边变圆
+    public static void cornersCircles(Mat src, Mat fillMat) {
+        cornersCircles(src, 0, -1, fillMat);
+    }
+
+    //两边变圆, 指明透明度,src 写出时要指定只此透明度的格式,比如png. (jgp不支持透明度)
+    public static void cornersCircles(Mat src, int opacity) {
+        cornersCircles(src, 0, opacity, null);
+    }
+
+    //两边变圆, 指明透明度,src 写出时要指定只此透明度的格式,比如png. (jgp不支持透明度)
+    public static void cornersCircles(Mat src, int opacity, Mat fillMat) {
+        cornersCircles(src, 0, opacity, fillMat);
     }
 
     //fontScale: 缩放倍数, thickness: 线条粗细
@@ -122,6 +173,21 @@ public class OpencvUtils {
         src.put(scalar);
     }
 
+    //支持 #fbfcfc 这种格式
+    public static void backgroundColor(Mat src, String backgroundColor, int decrease) {
+        String substring = backgroundColor.substring(1, backgroundColor.length());
+        int c = substring.length() / 3;
+        List<Double> rgb = new ArrayList<>(3);
+        for (int i = 1; i <= 3; i++) {
+            int start = (i - 1) * c;
+            int end = start + c;
+            double color = Integer.parseInt(substring.substring(start, end), 16);
+            rgb.add(color);
+        }
+        Scalar scalar = RGB(rgb.get(0) - decrease, rgb.get(1) - decrease, rgb.get(2) - decrease);
+        src.put(scalar);
+    }
+
     //指定透明度. 值越大,透明度越高
     public static void opacity(Mat src, int opacity) {
         Mat mat = new Mat();
@@ -142,6 +208,7 @@ public class OpencvUtils {
         imwrite(des, mat);
     }
 
+    //写中文汉字
     public static boolean writeChineseText(Mat mat, String markContent, int paddingLeft, int paddingTop, int fontSize) {
         File file = new File("./temp");
         if (!file.exists()) {
@@ -177,5 +244,22 @@ public class OpencvUtils {
             return false;
         }
         return true;
+    }
+
+    //写视频
+    public static void writeVideoFromJpg(String desPath, List<Mat> mats, int fps){
+        int fourcc = VideoWriter.fourcc("M".getBytes()[0], "J".getBytes()[0], "P".getBytes()[0], "G".getBytes()[0]);
+        VideoWriter videoWriter = new VideoWriter(desPath, fourcc, fps, mats.get(0).size());
+        for(Mat mat : mats){
+            videoWriter.write(mat);
+        }
+        videoWriter.release();
+    }
+
+    //高斯模糊, range( 表示内核大小的Size对象。) , sigma 可以理解为权重, count. 高斯模糊处理几次
+    public static void gaussianBlur(Mat src, int range, double sigma, int count){
+        for(int i = 0 ; i< count; i++){
+            GaussianBlur(src,src, new Size(range,range), sigma, sigma,1);
+        }
     }
 }

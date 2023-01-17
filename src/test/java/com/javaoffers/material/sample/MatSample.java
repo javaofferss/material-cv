@@ -193,9 +193,10 @@ public class MatSample {
          *    Scale:缩放比例
          */
         Mat newMat = getRotationMatrix2D(point, 45, 1);
-        // 输入,输出,旋转,大小
+
         Mat des = copy.clone();
         Size size = copy.size();
+        // 输入,输出,旋转,大小
         warpAffine(copy, des, newMat, size);
         imwrite("img/rotationMatrix2D.jpg", des);
 
@@ -351,7 +352,7 @@ public class MatSample {
         putText(clone, "hello", writePoint, FONT_HERSHEY_SIMPLEX, 2.0, Scalar.WHITE, 5, LINE_8,false);
         imwrite("img/putText.jpg", clone);
     }
-    
+
 
     /**
      * 融合两张图片
@@ -432,6 +433,18 @@ public class MatSample {
         imwrite("img/testCornerRadius.png", cutMat);
     }
 
+    /**
+     * 高斯模糊
+     */
+    @Test
+    public void gusiblur(){
+        Mat clone = imread.clone();
+        for(int i=0; i< 1000; i++){
+            //size 越大越容易模糊
+            GaussianBlur(clone,clone, new Size(23,23), 17.0,17.0,1);
+        }
+        imwrite("img/gusiblur.jpg", clone);
+    }
 
 
 }

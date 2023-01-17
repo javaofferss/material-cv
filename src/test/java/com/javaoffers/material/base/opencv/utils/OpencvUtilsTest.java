@@ -67,4 +67,28 @@ public class OpencvUtilsTest {
 
         imwrite("img/testWriteText.png", apply);
     }
+
+    @Test
+    public void testFusion() {
+        Mat clone = imread.clone();
+        Mat apply = OpencvUtils.cutMat(imread,0, 110, 100, 50);
+        //这些值需要慢慢的去调试观察,找到合时的值
+        OpencvUtils.writeChineseText(apply, "您好",13,35,30);
+
+        OpencvUtils.fusion(clone, 0.5, imread, 0.5, 0, clone);
+
+        imwrite("img/testFusion.png", clone);
+    }
+
+    @Test
+    public void testCornersCircles() {
+        Mat apply = OpencvUtils.cutMat(imread.clone(),0, 110, 100, 50);
+        Mat clone = apply.clone();
+        //这些值需要慢慢的去调试观察,找到合时的值
+        OpencvUtils.backgroundColor(apply, "#80aa27");
+        OpencvUtils.writeChineseText(apply, "您好",13,35,30);
+        OpencvUtils.cornersCircles(apply, clone);
+
+        imwrite("img/testCornersCircles.png", apply);
+    }
 }
