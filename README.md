@@ -4,7 +4,7 @@
 - Ubuntu needs to install tesseract-ocr
 - Ubuntu does not need to install opencv. Use opencv directly
 
-##### 已经实现的功能
+##### Functions already implemented
 - Image text recognition
 - Image to barrage effect (video)
 - Add random little stars to pictures (image)
