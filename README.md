@@ -1,9 +1,10 @@
 # metrerial-cv
-### 做一个 opencv 的素材库. 
-#### openCV + OCR 光学字符识别
-- ubuntu 需要安装 tesseract-ocr
-- ubuntu 不需要安装opencv. 直接使用opencv
+### Make an opencv material library.
+#### openCV + OCR optical character recognition
+- Ubuntu needs to install tesseract-ocr
+- Ubuntu does not need to install opencv. Use opencv directly
 
 ##### 已经实现的功能
-- 图片文字识别
-- 
+- Image text recognition
+- Image to barrage effect (video)
+- Add random little stars to pictures (image)

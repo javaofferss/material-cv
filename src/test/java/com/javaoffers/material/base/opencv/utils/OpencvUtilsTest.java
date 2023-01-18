@@ -95,13 +95,13 @@ public class OpencvUtilsTest {
 
     @Test
     public void drawStar() {
-        for(int i = 0 ; i < 10; i++){
+        for(int i = 0 ; i < 20; i++){
             double x = Math.random() * (imread.arrayWidth() * 1.0);
             double y = Math.random() * (imread.arrayHeight() * 1.0);
             int size = (int)(Math.random() * 100.0);
-            size = size == 0 ? 100 : size;
+            size = size == 0 ? 20 : size;
             try {
-                OpencvUtils.drawStar(imread, (int)x, (int)y, size, size / 6, Scalar.WHITE, (int)(10.0 * Math.random()) + 5);
+                OpencvUtils.drawStar(imread, (int)x, (int)y, size, size / 8, Scalar.WHITE, (int)(10.0 * Math.random()) + 5, 5);
             }catch (Exception e){
                 //e.printStackTrace();
             }

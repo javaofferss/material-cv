@@ -272,8 +272,9 @@ public class OpencvUtils {
      * @param angleSize 角的大小
      * @param scalar 星星的颜色
      * @param gusiCount 星星的模糊度
+     * @param restoreSimilarity  星星边缘模糊度. 越小越模糊, 越大边缘越清晰
      */
-    public static void drawStar(Mat mat, int xMat, int yMat, int drawSize, int angleSize, Scalar scalar, int gusiCount){
+    public static void drawStar(Mat mat, int xMat, int yMat, int drawSize, int angleSize, Scalar scalar, int gusiCount, int restoreSimilarity){
         Mat clone = mat;
         Mat cut = clone.apply(new Rect(xMat, yMat, drawSize, drawSize)); // 100 是整个star的大小
         Mat fillMat = cut.clone();
@@ -351,10 +352,6 @@ public class OpencvUtils {
         //还原部分. 星星周围模糊,但是不能全部模糊, 注意: 这里可以尝试圆切,可能效果会更好一点.
         int fillX = fillMat.arrayWidth();
         int fillY = fillMat.arrayHeight();
-        int xl =  centerX - radius;
-        int xr = centerX + radius; //在 xl -xr 之间的忽略
-        int yu = centerY - radius;
-        int yd = centerY + radius; // 在 yu - yd 之间的忽略
         for(int i = 0; i < fillY; i++){
             for(int j = 0; j < fillX; j++){
                 BytePointer cutPtr = cut.ptr(i, j);
@@ -367,9 +364,13 @@ public class OpencvUtils {
                 byte fg = fillPtr.get(1);
                 byte fb = fillPtr.get(2);
 
+                boolean br = Math.abs(fr - r) < 20;
+                boolean bg = Math.abs(fg - g) < 20;
+                boolean bb = Math.abs(fb - b) < 20;
 
+                br = br && bg && bb; // 相似的部分还原
 
-                if((i > yu && i < yd) || (j > xl && j < xr)){
+                if( !br){
                     continue;
                 }
 
@@ -378,13 +379,13 @@ public class OpencvUtils {
                 cutPtr.put(2, fb);
             }
         }
-        //次数与多越模糊
-        wd = (int)Math.floor(wd * 2); //让圆大一点.
-        radius = wd / 2 ; //半径, 重新计算半径
-        pointX = centerX  - radius;
-        pointY = centerY  - radius;
-        OpencvUtils.gaussianBlur(cutMat(cut, pointX, pointY, wd, wd), 3, 1, 5); // 再次模糊.避免填充带来的机械感
+//        //次数与多越模糊
+//        wd = (int)Math.floor(wd * 1.5); //让圆大一点.
+//        radius = wd / 2 ; //半径, 重新计算半径
+//        pointX = centerX  - radius;
+//        pointY = centerY  - radius;
+//        OpencvUtils.gaussianBlur(cutMat(cut, pointX, pointY, wd, wd), 3, 1, 5); // 再次模糊.避免填充带来的机械感
 
-        OpencvUtils.fusion(cut, 0.9, fillMat, 0.1, 0, cut);
+        //OpencvUtils.fusion(cut, 0.9, fillMat, 0.1, 0, cut);
     }
 }
