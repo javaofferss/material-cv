@@ -36,7 +36,7 @@ public class StarAbilityExecutor implements AbilityExecutor<StarMetaSource> {
             size = size > imread.arrayHeight()?imread.arrayHeight() : size;
             try {
                 //这些参数都是最终调试所得的最佳值.
-                Pair<Mat,Mat> mat = OpencvUtils.drawStar(imread, (int) x, (int) y, size, 2, Scalar.WHITE, (int)Math.ceil(Math.random() + 1.0), 15);
+                Pair<Mat,Mat> mat = OpencvUtils.drawStar(imread, (int) x, (int) y, size, 2, Scalar.WHITE,  2, 15);
                 //先将小星星部分隐藏
                 double alpha = oneFloat(Math.random());
                 boolean isUp = alpha < 0.2;
