@@ -1,14 +1,18 @@
 package com.javaoffers.material.base.opencv.utils;
 
+import com.javaoffers.material.base.utils.Assert;
 import com.sun.image.codec.jpeg.JPEGCodec;
 import com.sun.image.codec.jpeg.JPEGEncodeParam;
 import com.sun.image.codec.jpeg.JPEGImageEncoder;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 
+import static com.javaoffers.material.base.opencv.utils.Utils.parseRGB;
 import static org.bytedeco.opencv.global.opencv_core.addWeighted;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.*;
 import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2BGRA;
@@ -160,30 +164,14 @@ public class OpencvUtils {
 
     //支持 #fbfcfc 这种格式
     public static void backgroundColor(Mat src, String backgroundColor) {
-        String substring = backgroundColor.substring(1, backgroundColor.length());
-        int c = substring.length() / 3;
-        List<Double> rgb = new ArrayList<>(3);
-        for (int i = 1; i <= 3; i++) {
-            int start = (i - 1) * c;
-            int end = start + c;
-            double color = Integer.parseInt(substring.substring(start, end), 16);
-            rgb.add(color);
-        }
+        List<Double> rgb = parseRGB(backgroundColor);
         Scalar scalar = RGB(rgb.get(0), rgb.get(1), rgb.get(2));
         src.put(scalar);
     }
 
     //支持 #fbfcfc 这种格式
     public static void backgroundColor(Mat src, String backgroundColor, int decrease) {
-        String substring = backgroundColor.substring(1, backgroundColor.length());
-        int c = substring.length() / 3;
-        List<Double> rgb = new ArrayList<>(3);
-        for (int i = 1; i <= 3; i++) {
-            int start = (i - 1) * c;
-            int end = start + c;
-            double color = Integer.parseInt(substring.substring(start, end), 16);
-            rgb.add(color);
-        }
+        List<Double> rgb = parseRGB(backgroundColor);
         Scalar scalar = RGB(rgb.get(0) - decrease, rgb.get(1) - decrease, rgb.get(2) - decrease);
         src.put(scalar);
     }
@@ -273,14 +261,15 @@ public class OpencvUtils {
      * @param scalar 星星的颜色
      * @param gusiCount 星星的模糊度
      * @param restoreSimilarity  星星边缘模糊度. 越小越模糊, 越大边缘越清晰
+     * @return matStar
      */
-    public static void drawStar(Mat mat, int xMat, int yMat, int drawSize, int angleSize, Scalar scalar, int gusiCount, int restoreSimilarity){
+    public static Pair<Mat,Mat> drawStar(Mat mat, int xMat, int yMat, int drawSize, int angleSize, Scalar scalar, int gusiCount, int restoreSimilarity){
         Mat clone = mat;
-        Mat cut = clone.apply(new Rect(xMat, yMat, drawSize, drawSize)); // 100 是整个star的大小
+        Mat cut = clone.apply(new Rect(xMat, yMat, drawSize, drawSize)); //  The size of the entire star
         Mat fillMat = cut.clone();
         //cut.put(Scalar.BLACK);
-        int wd = angleSize;// 可以控制四个角的大小
-        int radius = wd / 2 ; //半径
+        int wd = angleSize;// Can control the size of the four corners
+        int radius = wd / 2 ; //Radius
 
         int centerX = cut.arrayWidth() / 2;
         int centerY = cut.arrayHeight() / 2;
@@ -328,8 +317,8 @@ public class OpencvUtils {
         }
         line(cut, rightPoint, rightPoint2, scalar);
 
-        wd = (int)Math.floor(wd * 1.2); //让圆大一点.
-        radius = wd / 2 ; //半径, 重新计算半径
+        wd = (int)Math.floor(wd * 1.1); //Make the circle bigger.
+        radius = wd / 2 ; //radius, recalculate radius
         int pointX = centerX  - radius;
         int pointY = centerY  - radius;
         Mat radioCut = cut.apply(new Rect(pointX, pointY, wd, wd));
@@ -347,14 +336,37 @@ public class OpencvUtils {
                 }
             }
         }
-        //次数与多越模糊
-        OpencvUtils.gaussianBlur(cut, 5, 1, gusiCount); // count 决定模糊程度
-        //还原部分. 星星周围模糊,但是不能全部模糊, 注意: 这里可以尝试圆切,可能效果会更好一点.
+        //The number of times and the more blurred
+        if(gusiCount > 0){
+            OpencvUtils.gaussianBlur(cut, 3, 1, gusiCount); // count determines the degree of fuzziness
+        }
+        //Restore the part. The surroundings of the stars are blurred,
+        // but not all of them. Note: You can try a circle cut here, and the effect may be better.
+        mergeSimilar(restoreSimilarity, cut, fillMat);
+        return Pair.of(cut,fillMat);
+    }
+
+    public static Mat readImg(String srcFilePath) {
+        return imread(srcFilePath);
+    }
+
+    public static void cover2RGBA(Mat imread) {
+        cvtColor(imread, imread, COLOR_BGR2BGRA);;
+    }
+
+    public static void mergeSimilar(int restoreSimilarity, Mat srcMat, Mat fillMat) {
+        mergeSimilar( restoreSimilarity,  srcMat,  fillMat, null);
+    }
+
+
+    public static void mergeSimilar(int restoreSimilarity, Mat srcMat, Mat fillMat, Scalar ignoreColor) {
+        Assert.isTrue(srcMat.arrayHeight() == fillMat.arrayHeight() && srcMat.arrayWidth() == fillMat.arrayWidth(),
+                "Width and height must be the same");
         int fillX = fillMat.arrayWidth();
         int fillY = fillMat.arrayHeight();
         for(int i = 0; i < fillY; i++){
             for(int j = 0; j < fillX; j++){
-                BytePointer cutPtr = cut.ptr(i, j);
+                BytePointer cutPtr = srcMat.ptr(i, j);
                 BytePointer fillPtr = fillMat.ptr(i, j);
                 byte r = cutPtr.get(0);
                 byte g = cutPtr.get(1);
@@ -363,12 +375,21 @@ public class OpencvUtils {
                 byte fr = fillPtr.get(0);
                 byte fg = fillPtr.get(1);
                 byte fb = fillPtr.get(2);
+                if(ignoreColor != null){
 
-                boolean br = Math.abs(fr - r) < 20;
-                boolean bg = Math.abs(fg - g) < 20;
-                boolean bb = Math.abs(fb - b) < 20;
+                    byte ir = (byte) ignoreColor.get(0);
+                    byte ig = (byte) ignoreColor.get(1);
+                    byte ib = (byte) ignoreColor.get(2);
+                    if(ir == fr && ig ==fg && ib == fb){
+                        continue;
+                    }
+                }
 
-                br = br && bg && bb; // 相似的部分还原
+                boolean br = Math.abs(fr - r) < restoreSimilarity;
+                boolean bg = Math.abs(fg - g) < restoreSimilarity;
+                boolean bb = Math.abs(fb - b) < restoreSimilarity;
+
+                br = br && bg && bb; // Similar partial restoration
 
                 if( !br){
                     continue;
@@ -379,13 +400,5 @@ public class OpencvUtils {
                 cutPtr.put(2, fb);
             }
         }
-//        //次数与多越模糊
-//        wd = (int)Math.floor(wd * 1.5); //让圆大一点.
-//        radius = wd / 2 ; //半径, 重新计算半径
-//        pointX = centerX  - radius;
-//        pointY = centerY  - radius;
-//        OpencvUtils.gaussianBlur(cutMat(cut, pointX, pointY, wd, wd), 3, 1, 5); // 再次模糊.避免填充带来的机械感
-
-        //OpencvUtils.fusion(cut, 0.9, fillMat, 0.1, 0, cut);
     }
 }

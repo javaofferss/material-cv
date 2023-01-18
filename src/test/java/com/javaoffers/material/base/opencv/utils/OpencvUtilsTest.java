@@ -101,7 +101,8 @@ public class OpencvUtilsTest {
             int size = (int)(Math.random() * 100.0);
             size = size == 0 ? 20 : size;
             try {
-                OpencvUtils.drawStar(imread, (int)x, (int)y, size, size / 8, Scalar.WHITE, (int)(10.0 * Math.random()) + 5, 5);
+                OpencvUtils.drawStar(imread, (int) x, (int) y, size, size / 8, Scalar.WHITE, (int) (10.0 * Math.random()) + 5, 15);
+
             }catch (Exception e){
                 //e.printStackTrace();
             }

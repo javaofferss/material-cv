@@ -7,11 +7,16 @@ import com.javaoffers.material.base.opencv.MetaSource;
  */
 public class StarMetaSource extends MetaSource {
 
-    private int starCount;
+    private int starCount; //接近这个数字
 
-    public StarMetaSource(String srcFilePath, String desFilePath, int starCount) {
+    private int startRange; //星星大小的范围.
+
+    //private double flickerFactor;// 闪动因子. 0 < 1
+
+    public StarMetaSource(String srcFilePath, String desFilePath, int starCount, int startRange) {
         super(srcFilePath, desFilePath);
         this.starCount = starCount;
+        this.startRange = startRange;
     }
 
     public int getStarCount() {
@@ -20,5 +25,13 @@ public class StarMetaSource extends MetaSource {
 
     public void setStarCount(int starCount) {
         this.starCount = starCount;
+    }
+
+    public int getStartRange() {
+        return startRange;
+    }
+
+    public void setStartRange(int startRange) {
+        this.startRange = startRange;
     }
 }

@@ -1,5 +1,8 @@
 package com.javaoffers.material.base.opencv.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author mingJie
  */
@@ -18,5 +21,19 @@ public class Utils {
             }
         }
         return wd;
+    }
+
+
+    public static List<Double> parseRGB(String backgroundColor) {
+        String substring = backgroundColor.substring(1, backgroundColor.length());
+        int c = substring.length() / 3;
+        List<Double> rgb = new ArrayList<>(3);
+        for (int i = 1; i <= 3; i++) {
+            int start = (i - 1) * c;
+            int end = start + c;
+            double color = Integer.parseInt(substring.substring(start, end), 16);
+            rgb.add(color);
+        }
+        return rgb;
     }
 }

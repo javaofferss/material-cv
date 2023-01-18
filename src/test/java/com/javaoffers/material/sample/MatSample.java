@@ -556,5 +556,14 @@ public class MatSample {
 
     }
 
+    @Test
+    public void testScalar(){
+        Scalar white = Scalar.WHITE;
+        double v = white.get(0);
+        double v1 = white.get(1);
+        double v2 = white.get(2);
+        logger.info("v:{}, v1: {}, v2:{}", v, v1, v2);
+    }
+
 
 }
