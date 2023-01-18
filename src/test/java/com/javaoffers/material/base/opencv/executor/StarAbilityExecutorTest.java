@@ -10,7 +10,7 @@ public class StarAbilityExecutorTest {
     StarAbilityExecutor starAbilityExecutor = new StarAbilityExecutor();
     @Test
     public void executor() {
-        //星星尽量不要太大.会影响效果
+        //星星尽量不要太大.会影响效果, 目前15 . 35 这种效果还可以.
         StarMetaSource starMetaSource = new StarMetaSource("img/dog.png", "img/StarAbilityExecutorTest5.avi", 15, 35);
         starAbilityExecutor.executor(starMetaSource);
 
