@@ -7,4 +7,4 @@
 ##### Functions already implemented
 - Image text recognition
 - Image to barrage effect (video)
-- Add random little stars to pictures (image)
+- Add random little stars to pictures (image/video)
